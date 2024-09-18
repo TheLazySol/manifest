@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["GlobalDeposit","GlobalFixed","GlobalTrader"],"type":["GlobalDepositTree","GlobalDepositTreeReadOnly","GlobalRef","GlobalRefMut","GlobalTraderTree","GlobalTraderTreeReadOnly","GlobalValue"]};
