@@ -166,6 +166,14 @@
 <a href="#164" id="164">164</a>
 <a href="#165" id="165">165</a>
 <a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>num_enum::TryFromPrimitive;
 <span class="kw">use </span>shank::ShankInstruction;
 
@@ -222,8 +230,8 @@
     #[account(<span class="number">7</span>, name = <span class="string">"base_mint"</span>, desc = <span class="string">"Base mint, only inlcuded if base is Token22, otherwise not required"</span>)]
     #[account(<span class="number">8</span>, name = <span class="string">"token_program_quote"</span>, desc = <span class="string">"Token program(22) quote. Optional. Only include if different from base"</span>)]
     #[account(<span class="number">9</span>, name = <span class="string">"quote_mint"</span>, desc = <span class="string">"Quote mint, only inlcuded if base is Token22, otherwise not required"</span>)]
-    #[account(<span class="number">10</span>, writable, optional, name = <span class="string">"global"</span>, desc = <span class="string">"Global account"</span>)]
-    #[account(<span class="number">11</span>, writable, optional, name = <span class="string">"global_vault"</span>, desc = <span class="string">"Global vault"</span>)]
+    </span><span class="comment">// #[account(10, writable, optional, name = "global", desc = "Global account")]
+    // #[account(11, writable, optional, name = "global_vault", desc = "Global vault")]
     </span>Swap = <span class="number">4</span>,
 
     <span class="doccomment">/// Expand a market.
@@ -272,16 +280,16 @@
     #[account(<span class="number">1</span>, writable, name = <span class="string">"global"</span>, desc = <span class="string">"Global account"</span>)]
     #[account(<span class="number">2</span>, name = <span class="string">"mint"</span>, desc = <span class="string">"Mint for this global account"</span>)]
     #[account(<span class="number">3</span>, writable, name = <span class="string">"global_vault"</span>, desc = <span class="string">"Global vault"</span>)]
-    #[account(<span class="number">4</span>, name = <span class="string">"trader_token"</span>, desc = <span class="string">"Trader token account"</span>)]
+    #[account(<span class="number">4</span>, writable, name = <span class="string">"trader_token"</span>, desc = <span class="string">"Trader token account"</span>)]
     #[account(<span class="number">5</span>, name = <span class="string">"token_program"</span>, desc = <span class="string">"Token program(22)"</span>)]
     </span>GlobalDeposit = <span class="number">9</span>,
 
-    <span class="doccomment">/// Deposit into global account for a given token.
+    <span class="doccomment">/// Withdraw from global account for a given token.
     </span><span class="attr">#[account(<span class="number">0</span>, writable, signer, name = <span class="string">"payer"</span>, desc = <span class="string">"Payer"</span>)]
     #[account(<span class="number">1</span>, writable, name = <span class="string">"global"</span>, desc = <span class="string">"Global account"</span>)]
     #[account(<span class="number">2</span>, name = <span class="string">"mint"</span>, desc = <span class="string">"Mint for this global account"</span>)]
     #[account(<span class="number">3</span>, writable, name = <span class="string">"global_vault"</span>, desc = <span class="string">"Global vault"</span>)]
-    #[account(<span class="number">4</span>, name = <span class="string">"trader_token"</span>, desc = <span class="string">"Trader token account"</span>)]
+    #[account(<span class="number">4</span>, writable, name = <span class="string">"trader_token"</span>, desc = <span class="string">"Trader token account"</span>)]
     #[account(<span class="number">5</span>, name = <span class="string">"token_program"</span>, desc = <span class="string">"Token program(22)"</span>)]
     </span>GlobalWithdraw = <span class="number">10</span>,
 
@@ -295,12 +303,20 @@
     #[account(<span class="number">6</span>, name = <span class="string">"token_program"</span>, desc = <span class="string">"Token program(22)"</span>)]
     </span>GlobalEvict = <span class="number">11</span>,
 
-    <span class="comment">// TODO: Implement this. Users can clean another users unbacked or expired
-    // orders off the orderbook.
-    //#[account(0, writable, signer, name = "payer", desc = "Payer")]
-    // GlobalCleanOrder = 11,
-
-</span>}
+    <span class="doccomment">/// Removes an order from a market that cannot be filled. There are 3
+    /// reasons. It is expired, the global trader got evicted, or the global
+    /// trader no longer has deposited the funds to back the order. This
+    /// function results in cleaner orderbooks which helps reduce variance and
+    /// thus compute unit estimates for traders. It is incentivized by receiving
+    /// gas prepayment deposits. This is not required for normal operation of
+    /// market. It exists as a deterrent to unfillable and unmaintained global
+    /// spam.
+    </span><span class="attr">#[account(<span class="number">0</span>, writable, signer, name = <span class="string">"payer"</span>, desc = <span class="string">"Payer for this tx, receiver of rent deposit"</span>)]
+    #[account(<span class="number">1</span>, writable, name = <span class="string">"market"</span>, desc = <span class="string">"Account holding all market state"</span>)]
+    #[account(<span class="number">2</span>, name = <span class="string">"system_program"</span>, desc = <span class="string">"System program"</span>)]
+    #[account(<span class="number">3</span>, writable, name = <span class="string">"global"</span>, desc = <span class="string">"Global account"</span>)]
+    </span>GlobalClean = <span class="number">12</span>,
+}
 
 <span class="kw">impl </span>ManifestInstruction {
     <span class="kw">pub fn </span>to_vec(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
@@ -310,7 +326,7 @@
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>test_instruction_serialization() {
-    <span class="kw">let </span>num_instructions: u8 = <span class="number">11</span>;
+    <span class="kw">let </span>num_instructions: u8 = <span class="number">12</span>;
     <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">255 </span>{
         <span class="kw">let </span>instruction: ManifestInstruction = <span class="kw">match </span>ManifestInstruction::try_from(i) {
             <span class="prelude-val">Ok</span>(j) =&gt; {
